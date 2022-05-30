@@ -3,7 +3,7 @@
 
 const short M = 32;
 const short N = 2;
-const short velicinaOkvira = 64;
+
 class proces
 {
     static int num;
@@ -16,15 +16,15 @@ public:
 uint16_t generirajLogAdresu()
 {
     srand(time(NULL));
-    return (rand() % 1024) & (0x3fe);
+    return (rand() % 1024) & (1022);
 }
 
-int nadiPrviPrazni(uint8_t okviri[][64])
+int nadiPrviPrazni(uint8_t okviri[][16])
 {
     for (int i = 0; i < M; i++)
     {
         bool empty = true;
-        for (int j = 0; j < velicinaOkvira; j++)
+        for (int j = 0; j < 16; j++)
         {
             if (okviri[i][j] != 0)
             {
@@ -46,15 +46,13 @@ int main()
 
     srand(time(NULL));
     proces procesi[N];
-    uint8_t okviri[M][64] = {0};
-    uint8_t disk[N][16][64];
+    uint8_t okviri[M][16] = {0};
+    uint8_t disk[N][16];
     for (int i = 0; i < N; i++)
     {
         for (int j = 0; j < 16; j++)
         {
-            for(int k=0; k<velicinaOkvira; k++){
-            disk[i][j][k] = rand();
-            }
+            disk[i][j] = rand();
         }
     }
 
@@ -120,15 +118,15 @@ int main()
 
                         }
                     }
-                    for (int j = 0; j < velicinaOkvira; j++)
+                    for (int j = 0; j < 16; j++)
                     {
-                       disk[indexIzbacenog][indexRedakTablice][j] = okviri[indexOkvir][j]; // spremanje stranice na disk
+                       disk[indexIzbacenog][j] = okviri[indexOkvir][j]; // spremanje stranice na disk
                     }
                 }
                 printf("\t\t Dodjeljujem okvir 0x%.4x\n", indexOkvir);
-                for (int j = 0; j < velicinaOkvira; j++)
+                for (int j = 0; j < 16; j++)
                 {
-                    okviri[indexOkvir][j] = disk[i][indexRedakTablice][j]; // učitavanje stranice s diska
+                    okviri[indexOkvir][j] = disk[i][j]; // učitavanje stranice s diska
                 }
                 redakTab = ((indexOkvir << 6) | (t)) | 0x20;
                 fizAdresa = (redakTab & 0xffc0) | (logAdresa & 0x3f);

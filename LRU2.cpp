@@ -54,6 +54,7 @@ int main()
         {
             for(int k=0; k<velicinaOkvira; k++){
             disk[i][j][k] = rand();
+            //disk[i][j][k]=1;
             }
         }
     }
@@ -81,10 +82,9 @@ int main()
             printf("\t log. adresa: 0x%.4x\n", logAdresa);
 
             uint8_t indexRedakTablice = logAdresa >> 6; // treba nam samo višim 4 bita od 10 adrese
-            uint8_t fizAdresa;
+            uint16_t fizAdresa;
             uint16_t redakTablice = procesi[i].tablicaPrevodenja[indexRedakTablice];
             printf("\t index redka tablice: 0x%.4x\n", (int)indexRedakTablice);
-            uint8_t redakTab;
             if ((redakTablice & 0x20) == 0)
             { // provjeravamo jeli na 6 bitu nula
                 std::cout << "\t Promasaj!\n";
@@ -130,23 +130,27 @@ int main()
                 {
                     okviri[indexOkvir][j] = disk[i][indexRedakTablice][j]; // učitavanje stranice s diska
                 }
-                redakTab = ((indexOkvir << 6) | (t)) | 0x20;
-                fizAdresa = (redakTab & 0xffc0) | (logAdresa & 0x3f);
+                redakTablice = ((indexOkvir << 6) | (t)) | 0x20;
+                fizAdresa = (redakTablice & 0xffc0) | (logAdresa & 0x3f);
             }
             else
             {
-                std::cout << "Pogodak!\n";
+                 std::cout << "Pogodak!\n";
                 fizAdresa = (redakTablice & 0xffc0) | (logAdresa & 0x3f);
-                redakTab = (procesi[i].tablicaPrevodenja[indexRedakTablice] | t) | 0x20;
+                redakTablice = (procesi[i].tablicaPrevodenja[indexRedakTablice] | t) | 0x20;
             }
 
             printf("\tFizička adresa: 0x%.4x\n", (int)fizAdresa);
-            printf("\tZapis tablice: 0x%.4x\n", (int)redakTab);
-            procesi[i].tablicaPrevodenja[indexRedakTablice] = redakTab;
+            printf("\tZapis tablice: 0x%.4x\n", (int)redakTablice);
+            procesi[i].tablicaPrevodenja[indexRedakTablice] = redakTablice;
             t++; 
             // postavi LRU metapodataka na t
-            uint8_t sadrzajAdrese = okviri[(fizAdresa >> 6) & 0x3ff][(fizAdresa & 0x3f)];
+           
+            uint16_t sadrzajAdrese = okviri[(fizAdresa >> 6) & 0x3ff][(fizAdresa & 0x3f)];
+               
             printf("\tSadrzaj adrese: 0x%.4x\n", (int)sadrzajAdrese);
+             //okviri[(fizAdresa >> 6) & 0x3ff][(fizAdresa & 0x3f)]++;
+            
             std::cout << "--------------------------------\n";
             sleep(1);
         }
