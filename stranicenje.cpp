@@ -1,8 +1,8 @@
 #include <iostream>
 #include <unistd.h>
 
-const short M = 1;
-const short N = 2;
+const short defaultM = 1;
+const short defaultN = 2;
 const short velicinaOkvira = 32;
 class proces
 {
@@ -18,7 +18,7 @@ uint16_t generirajLogAdresu()
     return (rand() % 1024) & (0x3fe);
 }
 
-int nadiPrviPrazni(uint16_t okviri[][velicinaOkvira])
+int nadiPrviPrazni(uint16_t okviri[][velicinaOkvira], const int M)
 {
     for (int i = 0; i < M; i++)
     {
@@ -40,13 +40,26 @@ int nadiPrviPrazni(uint16_t okviri[][velicinaOkvira])
 }
 int proces::num;
 
-int main()
+int main(int argc, char *argv[])
 {
-
+    
+    int input1, input2;
+    if(argc >=3){
+       input1= atoi(argv[1]); //prvi argument je M (broj okvira u RAMU)
+       input2 = atoi (argv[2]); // drugi argument je N (broj procesa)
+    }
+    else{
+        input1 = defaultM;
+        input2=  defaultN;
+    }
+    const int M = input1;;
+    const int N = input2;
     srand(time(NULL));
     proces procesi[N];
     uint16_t okviri[M][velicinaOkvira] = {0};
     uint16_t disk[N][16][velicinaOkvira];
+
+
     for (int i = 0; i < N; i++)
     {
         for (int j = 0; j < 16; j++)
@@ -59,7 +72,7 @@ int main()
 
     uint16_t t = 0;
     int indexOkvir = 0;
-    //for(int ii=0; ii<100000; ii++){
+   // for(int ii=0; ii<100000; ii++){
     while (1){
         for (int i = 0; i < N; i++)
         {
@@ -76,8 +89,8 @@ int main()
             }
             std::cout << "Proces: " << i << "\n";
             std::cout << "\t t: " << t << "\n";
-           // uint16_t logAdresa = 785;
-           u_int16_t logAdresa = (rand() % 1024) & (0x3fe);
+            //uint16_t logAdresa = 0x1fe;
+            u_int16_t logAdresa = (rand() % 1024) & (0x3fe);
             printf("\t log. adresa: 0x%.4x\n", logAdresa);
 
             uint8_t indexRedakTablice = logAdresa >> 6; // treba nam samo višim 4 bita od 10 adrese
@@ -87,7 +100,7 @@ int main()
             if ((redakTablice & 0x20) == 0)
             { // provjeravamo jeli na 6 bitu nula
                 std::cout << "\t Promasaj!\n";
-                indexOkvir = nadiPrviPrazni(okviri);
+                indexOkvir = nadiPrviPrazni(okviri, M);
                 if (indexOkvir == -1)
                 {
                     int min = INT32_MAX;
@@ -95,7 +108,6 @@ int main()
                     int indexIzbacenog = -1;
                     for (int z = 0; z < N; z++)
                     {
-                       // if(z != i){
                         for (int j = 0; j < 16; j++)
                         { // ide kroz cijelu tablicu prevođenja i traži min lru
                             if (((procesi[z].tablicaPrevodenja[j] >> 5) & 1) == 1)
@@ -147,18 +159,7 @@ int main()
             // postavi LRU metapodataka na t
             uint16_t sadrzajAdrese = okviri[(fizAdresa >> 6) & 0x3ff][(fizAdresa & 0x3f)/2]++ - 1;
             printf("\tSadrzaj adrese: 0x%.4x\n", (int)sadrzajAdrese);
-            //okviri[(fizAdresa >> 6) & 0x3ff][(fizAdresa & 0x3f)]++;
-               // disk[i][indexRedakTablice][(fizAdresa & 0x3f)] =  sadrzajAdrese+1;
-                for(int p=0; p<N ;p++){
-                    for(int c=0; c<32; c++){
-                        for(int v=0; v<32; v++){
-                            if(disk[p][c][v] == 2){
-                               // std::cout <<"JEEEES \n";
-                            }
-                        }
-                    }
-                }
-                
+
             std::cout << "--------------------------------\n";
             sleep(1);
         }
